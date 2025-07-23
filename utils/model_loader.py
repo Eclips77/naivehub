@@ -2,23 +2,36 @@ import json
 from typing import Dict, Any
 
 class ModelLoader:
-    """Loads a trained Naive Bayes model from a JSON file."""
+    """Utility class for loading trained Naive Bayes models from JSON files.
+    
+    This class provides functionality to load pre-trained machine learning models
+    that have been serialized to JSON format, with proper validation and error handling.
+    """
 
     @staticmethod
     def load_model(path: str) -> Dict[str, Any]:
-        """
-        Load a model from a JSON file.
+        """Load a trained Naive Bayes model from a JSON file.
+
+        This method loads a model that contains the necessary components for
+        Naive Bayes classification: classes, priors, and likelihoods.
 
         Args:
-            path (str): Path to the model JSON file.
+            path (str): Absolute or relative path to the model JSON file.
 
         Returns:
-            Dict[str, Any]: The loaded model dictionary.
+            Dict[str, Any]: A dictionary containing the loaded model with keys:
+                - 'classes': List of class labels
+                - 'priors': Prior probabilities for each class
+                - 'likelihoods': Feature likelihoods for each class
 
         Raises:
-            FileNotFoundError: If file does not exist.
-            ValueError: If file content is invalid.
-            RuntimeError: For any other errors.
+            FileNotFoundError: If the specified model file does not exist.
+            ValueError: If the file content is not valid JSON or missing required keys.
+            RuntimeError: For any other unexpected errors during loading.
+            
+        Example:
+            >>> model = ModelLoader.load_model("models/naive_bayes_model.json")
+            >>> predictor = NaiveBayesPredictor(model)
         """
         try:
             with open(path, "r") as f:

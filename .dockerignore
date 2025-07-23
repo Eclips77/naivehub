@@ -1,0 +1,25 @@
+# Docker ignore file
+.git
+.gitignore
+.idea
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.env
+.venv
+venv/
+env/
+ENV/
+.pytest_cache
+.coverage
+htmlcov/
+.mypy_cache
+.DS_Store
+Thumbs.db
+*.log
+models/*.json
+start_servers.*
+README.md
