@@ -13,7 +13,7 @@ class NaiveBayesClassificationManager:
     a facade that simplifies classification tasks.
     """
 
-    def __init__(self, model_path: str = None, model_dict: Dict[str, Any] = None):
+    def __init__(self, model_path: str , model_dict: Dict[str, Any]):
         """Initialize the classification manager.
         
         Args:
