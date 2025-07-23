@@ -1,0 +1,29 @@
+# Storage Server Dockerfile
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Install only required dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy storage server files
+COPY managers/ managers/
+COPY utils/ utils/
+COPY servers/storage_server.py servers/storage_server.py
+
+# Create empty __init__.py files
+RUN touch managers/__init__.py utils/__init__.py servers/__init__.py
+
+# Create directories for data and models
+RUN mkdir -p /app/Data /app/models
+
+# Expose port
+EXPOSE 8002
+
+# Run storage server
+CMD ["uvicorn", "servers.storage_server:app", "--host", "0.0.0.0", "--port", "8002"]
