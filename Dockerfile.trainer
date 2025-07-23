@@ -14,6 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy only training server files
 COPY managers/ managers/
 COPY services/trainer.py services/trainer.py
+COPY services/classifier.py services/classifier.py
+COPY services/evaluator.py services/evaluator.py
 COPY utils/ utils/
 COPY servers/trainer_server.py servers/trainer_server.py
 

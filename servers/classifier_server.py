@@ -4,9 +4,7 @@ import requests
 import json
 import os
 from services.classifier import NaiveBayesPredictor
-from services.evaluator import NaiveBayesEvaluator
 from typing import Dict, Any
-import pandas as pd
 
 app = FastAPI(title="NaiveHub Classification Server")
 
@@ -28,11 +26,6 @@ class PredictRequest(BaseModel):
 
 class LoadModelRequest(BaseModel):
     model_name: str
-
-
-class EvaluateRequest(BaseModel):
-    model_name: str
-    test_data: list  # List of records with features and target
 
 
 @app.post("/load_model")
@@ -80,36 +73,6 @@ async def predict(req: PredictRequest):
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
 
-@app.post("/evaluate")
-async def evaluate_model(req: EvaluateRequest):
-    """Evaluate model accuracy on test data."""
-    try:
-        if req.model_name not in loaded_models:
-            raise HTTPException(status_code=400, detail=f"Model '{req.model_name}' not loaded")
-
-        predictor = loaded_models[req.model_name]
-        evaluator = NaiveBayesEvaluator(predictor)
-        
-        # Convert test data to DataFrame
-        df = pd.DataFrame(req.test_data)
-        
-        # Assume last column is the target
-        target_column = df.columns[-1]
-        X_test = df.drop(columns=[target_column])
-        y_test = df[target_column]
-        
-        # Evaluate
-        results = evaluator.evaluate(X_test, y_test)
-        
-        return {
-            "accuracy": results["accuracy"],
-            "accuracy_percentage": f"{results['accuracy'] * 100:.2f}%"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Evaluation error: {str(e)}")
-
-
 @app.get("/models")
 async def list_available_models():
     """Get list of models available on training server."""
@@ -127,5 +90,6 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "loaded_models": list(loaded_models.keys())
+        "loaded_models": list(loaded_models.keys()),
+        "trainer_url": TRAINER_URL
     }

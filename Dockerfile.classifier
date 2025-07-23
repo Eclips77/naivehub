@@ -13,7 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy only classification server files
 COPY services/classifier.py services/classifier.py
-COPY services/evaluator.py services/evaluator.py
 COPY servers/classifier_server.py servers/classifier_server.py
 
 # Create empty __init__.py files
