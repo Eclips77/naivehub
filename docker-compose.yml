@@ -10,6 +10,8 @@ services:
       - "8001:8001"
     environment:
       - PYTHONPATH=/app
+    volumes:
+      - ./Data:/app/Data
     networks:
       - naivehub-network
     healthcheck:

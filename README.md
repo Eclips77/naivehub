@@ -1,21 +1,30 @@
 # NaiveHub - Naive Bayes Classification System
 
-A comprehensive Naive Bayes classification system built with Python, featuring both standalone library usage and REST API services.
+A comprehensive Naive Bayes classification system built with Python, featuring both standalone library usage and REST API services with Docker containerization.
 
 ## 🚀 Features
 
 - **Complete Naive Bayes Implementation**: Custom implementation with Laplace smoothing
 - **Data Pipeline**: Automated data loading, cleaning, and splitting
-- **Microservices Architecture**: Separate training and classification servers
+- **Microservices Architecture**: Separate training and classification servers with clear separation of concerns
+- **Docker Containerization**: Easy deployment with Docker Compose
 - **REST API**: FastAPI-based web services for remote model training and prediction
-- **Comprehensive Evaluation**: Built-in model evaluation with detailed metrics
+- **Comprehensive Evaluation**: Built-in model evaluation with detailed metrics on training server
 - **Easy Integration**: Well-structured managers for different workflows
+- **Comprehensive Testing**: Complete test suite with standalone and integration testing
 
 ## 📁 Project Structure
 
 ```
 ├── main.py                     # Main demonstration script
 ├── requirements.txt            # Python dependencies
+├── docker-compose.yml          # Docker services configuration
+├── Dockerfile.trainer          # Training server Docker image
+├── Dockerfile.classifier       # Classification server Docker image
+├── .gitignore                  # Git ignore patterns
+├── test_naivehub.py           # Comprehensive test suite
+├── USAGE_GUIDE.md             # Detailed usage guide
+├── POSTMAN_GUIDE_V2.md        # API testing with Postman
 ├── managers/                   # High-level workflow managers
 │   ├── classifier_manager.py   # Classification workflow management
 │   ├── data_manager.py         # Data preparation pipeline
@@ -25,8 +34,8 @@ A comprehensive Naive Bayes classification system built with Python, featuring b
 │   ├── evaluator.py           # Model evaluation metrics
 │   └── trainer.py             # Naive Bayes training algorithm
 ├── servers/                    # REST API servers
-│   ├── classifier_server.py   # Classification API service
-│   └── trainer_server.py      # Training API service
+│   ├── classifier_server.py   # Classification API service (simplified)
+│   └── trainer_server.py      # Training API service (with evaluation)
 ├── utils/                      # Utility modules
 │   ├── data_cleaner.py        # Data cleaning operations
 │   ├── data_loader.py         # Data loading from various formats
@@ -36,6 +45,31 @@ A comprehensive Naive Bayes classification system built with Python, featuring b
 ```
 
 ## 🛠️ Installation
+
+### Option 1: Docker (Recommended)
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd NaiveHub
+   ```
+
+2. **Start with Docker Compose**:
+   ```bash
+   docker-compose up -d
+   ```
+
+   This will start both services:
+   - Training Server: http://localhost:8001
+   - Classification Server: http://localhost:8000
+
+3. **Check service health**:
+   ```bash
+   curl http://localhost:8001/health
+   curl http://localhost:8000/health
+   ```
+
+### Option 2: Local Development
 
 1. **Clone the repository**:
    ```bash
@@ -47,6 +81,8 @@ A comprehensive Naive Bayes classification system built with Python, featuring b
    ```bash
    pip install -r requirements.txt
    ```
+
+3. **Start servers manually** (see Server Setup section below)
 
 ## 🎯 Quick Start
 
@@ -87,26 +123,68 @@ prediction = classifier.predict_single({"feature1": "value1", "feature2": "value
 
 ## 🌐 Microservices Architecture
 
-NaiveHub uses a two-server architecture:
+NaiveHub uses a simplified two-server architecture with clear separation of concerns:
 
 ### 🎓 Training Server (Port 8001)
-- **Purpose**: Data processing, cleaning, splitting, and model training
-- **Storage**: Keeps trained models in memory
-- **Workflow**: Receives training requests → processes data → trains models → stores in memory
+- **Primary Purpose**: Complete training workflow management
+- **Responsibilities**: 
+  - Data processing, cleaning, and splitting
+  - Model training with Naive Bayes algorithm
+  - Model evaluation using stored test data
+  - Model storage and serving to classification server
+- **Storage**: Keeps trained models and test data in memory for evaluation
+- **Key Feature**: Handles evaluation requests using stored test data for trained models
 
 ### 🔮 Classification Server (Port 8000)  
-- **Purpose**: Model serving and predictions
-- **Storage**: Downloads models from training server and saves as JSON files locally
-- **Workflow**: Requests models from training server → saves locally → loads for predictions
+- **Primary Purpose**: Model serving and prediction only
+- **Responsibilities**:
+  - Loading models from training server
+  - Saving models locally as JSON files
+  - Making predictions on new data
+  - Model management (loading/unloading)
+- **Storage**: Downloads models from training server and caches locally
+- **Simplified Design**: No evaluation functionality - focused purely on predictions
 
 ### 🔄 Communication Flow
-1. **Training Server** processes data and trains models
-2. **Classification Server** requests trained models
-3. **Training Server** sends model data  
-4. **Classification Server** saves models as JSON files and loads for predictions
+1. **Training Server** processes data, trains models, and stores test data for evaluation
+2. **Classification Server** requests trained models from training server
+3. **Training Server** sends model data to classification server
+4. **Classification Server** saves models as JSON files and loads them for predictions
 5. **Clients** send prediction requests to Classification Server
+6. **Clients** send evaluation requests to Training Server (using stored test data)
 
-## 🛠️ Quick Server Setup
+## 🐳 Docker Setup
+
+### Quick Start with Docker Compose
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Rebuild and start (after code changes)
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Individual Container Management
+
+```bash
+# Build specific service
+docker-compose build trainer
+docker-compose build classifier
+
+# Restart specific service
+docker-compose restart trainer
+docker-compose restart classifier
+```
+
+## 🛠️ Server Setup (Local Development)
 
 ### Option 1: Using Startup Scripts
 
@@ -146,7 +224,16 @@ curl -X POST "http://localhost:8001/train" \
   }'
 ```
 
-### 2. Load Model into Classification Server
+### 2. Evaluate the Model (NEW - on Training Server)
+```bash
+curl -X POST "http://localhost:8001/evaluate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model_name": "tennis_model"
+  }'
+```
+
+### 3. Load Model into Classification Server
 ```bash
 curl -X POST "http://localhost:8000/load_model" \
   -H "Content-Type: application/json" \
@@ -155,7 +242,7 @@ curl -X POST "http://localhost:8000/load_model" \
   }'
 ```
 
-### 3. Make Predictions
+### 4. Make Predictions
 ```bash
 curl -X POST "http://localhost:8000/predict" \
   -H "Content-Type: application/json" \
@@ -176,21 +263,21 @@ curl -X POST "http://localhost:8000/predict" \
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/train` | Train a new model with data processing |
+| POST | `/evaluate` | **NEW** - Evaluate model using stored test data |
 | GET | `/models` | List all trained models in memory |
 | GET | `/model/{model_name}` | Get specific model data |
-| GET | `/health` | Health check |
+| GET | `/health` | Health check with training capabilities |
 
 ### Classification Server (http://localhost:8000)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/load_model` | Load model from training server |
-| POST | `/load_local_model` | Load model from local JSON file |
-| POST | `/predict` | Make predictions |
-| GET | `/models/available` | List models available on training server |
-| GET | `/models/loaded` | List models loaded in memory |
-| GET | `/models/local` | List models saved locally as JSON |
-| GET | `/health` | Health check |
+| POST | `/predict` | Make predictions using loaded models |
+| GET | `/models` | List models available on training server |
+| GET | `/health` | Health check with loaded models info |
+
+**Note**: Evaluation functionality has been moved from Classification Server to Training Server for better separation of concerns.
 
 ## 📊 Example Usage
 
@@ -243,6 +330,14 @@ print(f"Accuracy: {results['accuracy']:.3f}")
 
 - `TRAINER_URL`: URL of the training server (default: http://localhost:8001)
 
+### Docker Configuration
+
+The `docker-compose.yml` file configures:
+- **Network**: Custom bridge network for service communication
+- **Volumes**: Persistent storage for models and data
+- **Health Checks**: Automatic service health monitoring
+- **Port Mapping**: External access to services
+
 ### Data Format
 
 The system expects CSV files with:
@@ -250,20 +345,78 @@ The system expects CSV files with:
 - A target column with class labels
 - No missing values (automatically cleaned)
 
+## 📖 Documentation
+
+- **`USAGE_GUIDE.md`**: Comprehensive usage examples and workflows
+- **`POSTMAN_GUIDE_V2.md`**: API testing guide with Postman collections
+- **Inline Documentation**: Detailed docstrings in all modules
+
 ## 📈 Performance & Features
 
-- **Laplace Smoothing**: Handles unseen feature values
-- **Log Probabilities**: Prevents numerical underflow
+- **Laplace Smoothing**: Handles unseen feature values gracefully
+- **Log Probabilities**: Prevents numerical underflow in calculations
 - **Automatic Data Cleaning**: Removes missing values and duplicates
 - **Comprehensive Evaluation**: Accuracy, precision, recall, F1-score
-- **Microservices Ready**: Scalable API architecture
+- **Microservices Ready**: Scalable API architecture with Docker support
+- **Clear Separation of Concerns**: Training server handles training/evaluation, classification server handles predictions
+- **Persistent Storage**: Docker volumes ensure data persistence
+- **Health Monitoring**: Built-in health checks for all services
+- **Comprehensive Testing**: Full test coverage with automated validation
+
+## 🏗️ Architecture Benefits
+
+### Simplified Design
+- **Training Server**: Handles complete training workflow including evaluation
+- **Classification Server**: Focused solely on model serving and predictions
+- **Clear Responsibilities**: No overlap between training and prediction concerns
+
+### Scalability
+- **Independent Scaling**: Scale training and prediction services separately
+- **Docker Support**: Easy horizontal scaling with container orchestration
+- **Stateless Predictions**: Classification server can be replicated easily
+
+### Maintainability
+- **Modular Design**: Easy to modify individual components
+- **Comprehensive Testing**: Automated validation of all functionality
+- **Documentation**: Complete guides for usage and API testing
 
 ## 🧪 Testing
+
+### Comprehensive Test Suite
+
+Run the complete test suite that validates the entire system:
+
+```bash
+python test_naivehub.py
+```
+
+This test suite includes:
+- ✅ **Standalone Component Testing**: Data managers, trainers, classifiers
+- ✅ **Docker Integration Testing**: Container health and communication
+- ✅ **API Endpoint Testing**: All server endpoints and workflows
+- ✅ **End-to-End Testing**: Complete training → evaluation → prediction workflow
+
+### Manual Testing
 
 Run the demonstration to verify installation:
 
 ```bash
 python main.py
+```
+
+### Docker Testing
+
+Test the containerized services:
+
+```bash
+# Start services
+docker-compose up -d
+
+# Run test suite
+python test_naivehub.py
+
+# Check logs
+docker-compose logs
 ```
 
 ## 🤝 Contributing
