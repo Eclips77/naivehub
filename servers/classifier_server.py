@@ -4,7 +4,7 @@ import requests
 import json
 import os
 from services.classifier import NaiveBayesPredictor
-from typing import Dict, Any
+from typing import Dict
 
 app = FastAPI(title="NaiveHub Classification Server")
 
