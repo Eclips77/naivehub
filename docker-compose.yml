@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile.predictor
     container_name: naivehub-predictor
     ports:
-      - "8000:8000"
+      - "8003:8000"
     environment:
       - PYTHONPATH=/app
       - STORAGE_URL=http://storage:8002
