@@ -58,7 +58,11 @@ async def load_data_from_file(req: DataLoadRequest):
         # Check if file exists
         file_path = os.path.join(DATA_DIR, req.file_name)
         if not os.path.exists(file_path):
-            available_files = [f for f in os.listdir(DATA_DIR) if f.endswith('.csv')]
+            # List available files only if directory exists
+            if os.path.exists(DATA_DIR):
+                available_files = [f for f in os.listdir(DATA_DIR) if f.endswith('.csv')]
+            else:
+                available_files = []
             raise HTTPException(
                 status_code=404, 
                 detail=f"File '{req.file_name}' not found in Data directory. Available files: {available_files}"
@@ -84,6 +88,17 @@ async def load_data_from_file(req: DataLoadRequest):
             "sample_data": df.head(3).to_dict(orient="records")
         }
         
+    except FileNotFoundError:
+        if os.path.exists(DATA_DIR):
+            available_files = [f for f in os.listdir(DATA_DIR) if f.endswith('.csv')]
+        else:
+            available_files = []
+        raise HTTPException(
+            status_code=404, 
+            detail=f"File '{req.file_name}' not found in Data directory. Available files: {available_files}"
+        )
+    except pd.errors.ParserError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid CSV format in file '{req.file_name}': {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error loading data: {str(e)}")
 
@@ -91,13 +106,20 @@ async def load_data_from_file(req: DataLoadRequest):
 @app.post("/data/load_from_url")
 async def load_data_from_url(req: DataUrlRequest):
     """Download and load CSV data from URL."""
+    temp_path = None
     try:
         # Generate dataset ID if not provided
         dataset_id = req.dataset_id or f"url_dataset_{uuid.uuid4().hex[:8]}"
         
         # Download file from URL
-        response = requests.get(req.url)
+        response = requests.get(req.url, timeout=30)
         response.raise_for_status()
+        
+        # Check content type if available
+        content_type = response.headers.get('content-type', '').lower()
+        if content_type and 'text/csv' not in content_type and 'application/csv' not in content_type:
+            # Only warn, don't fail, as many CSV files are served without proper content type
+            pass
         
         # Save to temporary file
         temp_filename = f"temp_{dataset_id}.csv"
@@ -127,9 +149,21 @@ async def load_data_from_url(req: DataUrlRequest):
             "sample_data": df.head(3).to_dict(orient="records")
         }
         
+    except requests.Timeout:
+        raise HTTPException(status_code=408, detail=f"Timeout while downloading from URL: {req.url}")
+    except requests.ConnectionError:
+        raise HTTPException(status_code=503, detail=f"Connection error while accessing URL: {req.url}")
     except requests.RequestException as e:
         raise HTTPException(status_code=400, detail=f"Error downloading from URL: {str(e)}")
+    except pd.errors.ParserError as e:
+        # Clean up temp file if parsing fails
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
+        raise HTTPException(status_code=400, detail=f"Invalid CSV format in downloaded file: {str(e)}")
     except Exception as e:
+        # Clean up temp file on any other error
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
         raise HTTPException(status_code=400, detail=f"Error processing data: {str(e)}")
 
 
@@ -311,6 +345,7 @@ async def get_model(model_name: str):
             "metadata": {
                 "saved_at": model_info["saved_at"],
                 "file_path": model_file_path,
+                "accuracy": model_info.get("metadata", {}).get("accuracy", None),
                 **model_info.get("metadata", {})
             }
         }
@@ -327,13 +362,17 @@ async def list_models():
     try:
         models_list = []
         for model_name, metadata in models_metadata.items():
-            models_list.append({
+            model_info = {
                 "model_name": model_name,
                 "classes": metadata.get("classes", []),
                 "features": metadata.get("features", []),
                 "saved_at": metadata.get("saved_at"),
-                "metadata": metadata.get("metadata", {})
-            })
+                "metadata": {
+                    "accuracy": metadata.get("metadata", {}).get("accuracy", None),
+                    **metadata.get("metadata", {})
+                }
+            }
+            models_list.append(model_info)
         
         return {
             "available_models": models_list,

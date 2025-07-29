@@ -1,8 +1,193 @@
-# NaiveHub Streamlit Client
+# 🧠 NaiveHub Client - Streamlit Dashboard
 
-## 🤖 Professional Machine Learning Platform
+## Overview
+A beautiful, modern Streamlit web interface for the NaiveHub Machine Learning platform. This client provides a complete GUI for data management, model training, and predictions with advanced session state management.
 
-This is a comprehensive Streamlit client for the NaiveHub 3-tier machine learning architecture, providing a user-friendly interface for data management, model training, and predictions.
+## ✨ Features
+
+### 🎨 Modern UI/UX
+- **Responsive Design**: Beautiful gradient-based interface that works on all screen sizes
+- **Real-time Status**: Live server health monitoring
+- **Interactive Visualizations**: Plotly-powered charts and graphs
+- **Intuitive Navigation**: Tab-based layout with clear sections
+
+### 📊 Data Management
+- **Multiple Data Sources**: Load from local files or URLs
+- **Data Preparation**: Clean and split data for training
+- **Dataset Overview**: View all datasets with detailed information
+- **Sample Preview**: Inspect data before processing
+
+### 🚀 Model Training
+- **One-Click Training**: Train Naive Bayes models with automatic evaluation
+- **Real-time Results**: Immediate accuracy feedback
+- **Training History**: Track all training sessions
+- **Model Comparison**: Visual accuracy comparisons
+
+### 🔮 Smart Predictions
+- **Interactive Prediction**: Easy feature input interface
+- **Confidence Scores**: Detailed prediction confidence visualization
+- **Prediction History**: Track all prediction attempts
+- **Visual Feedback**: Plotly charts for confidence scores
+
+### 🛡️ Session State Management
+- **Persistent Data**: No data loss on page refreshes
+- **State Preservation**: Maintains user selections and history
+- **Smart Caching**: Efficient data management
+- **Auto-refresh**: Intelligent data synchronization
+
+## 🚀 Quick Start
+
+### Prerequisites
+Make sure all NaiveHub servers are running:
+- **Storage Server**: `http://localhost:8002`
+- **Training Server**: `http://localhost:8001`
+- **Prediction Server**: `http://localhost:8003`
+
+### Installation
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the client
+streamlit run naivehub_client_v2.py
+```
+
+### Usage
+1. **Open your browser** to `http://localhost:8501`
+2. **Check server status** in the sidebar (should show 🟢 for all servers)
+3. **Load data** from the Data tab
+4. **Prepare data** for training
+5. **Train models** from the Training tab
+6. **Make predictions** using trained models
+
+## 📱 Interface Sections
+
+### 📊 Data Tab
+- **Load Data**: Import CSV files from local storage or URLs
+- **Prepare Data**: Clean and split datasets for training
+- **View Datasets**: Browse all available datasets
+
+### 🚀 Training Tab
+- **Select Dataset**: Choose from prepared datasets
+- **Configure Training**: Set model name and parameters
+- **Monitor Progress**: Real-time training feedback
+- **View Results**: Accuracy and model details
+
+### 🤖 Models Tab
+- **Models Overview**: View all trained models
+- **Accuracy Comparison**: Visual model performance comparison
+- **Model Details**: Features, classes, and metadata
+
+### 🔮 Predictions Tab
+- **Select Model**: Choose from trained models
+- **Input Features**: Easy-to-use feature input form
+- **View Results**: Prediction with confidence scores
+- **Visual Analysis**: Confidence score charts
+
+## 🎯 Key Benefits
+
+### For Data Scientists
+- **Rapid Prototyping**: Quick model training and testing
+- **Visual Analytics**: Immediate feedback with charts
+- **Experiment Tracking**: Complete history of all activities
+- **No Code Required**: GUI-based workflow
+
+### For Business Users
+- **User-Friendly**: No technical knowledge required
+- **Real-time Insights**: Immediate prediction results
+- **Visual Reports**: Easy-to-understand charts and metrics
+- **Reliable**: Persistent session state prevents data loss
+
+## 🔧 Configuration
+
+### Server URLs
+Update these in the client code if your servers run on different ports:
+```python
+STORAGE_URL = "http://localhost:8002"
+TRAINER_URL = "http://localhost:8001"
+PREDICTOR_URL = "http://localhost:8003"
+```
+
+### Styling
+The interface uses custom CSS for modern styling. You can modify the styles in the `st.markdown()` section at the top of the file.
+
+## 🛠️ Technical Details
+
+### Session State Management
+The client uses a sophisticated session state system that:
+- Preserves all user data across page interactions
+- Maintains training and prediction history
+- Caches API responses for better performance
+- Prevents data loss during Streamlit reruns
+
+### Error Handling
+- **Comprehensive Error Messages**: Clear feedback for all operations
+- **Server Health Checks**: Automatic server connectivity monitoring
+- **Graceful Degradation**: Interface remains functional even if servers are down
+- **Timeout Management**: Prevents hanging requests
+
+### Performance Optimization
+- **Smart Caching**: Reduces unnecessary API calls
+- **Lazy Loading**: Data loaded only when needed
+- **Efficient Updates**: Targeted state updates
+- **Responsive UI**: Fast interaction feedback
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **Servers Not Responding**
+   - Check that all three servers are running
+   - Verify port numbers in configuration
+   - Check firewall settings
+
+2. **Data Loading Fails**
+   - Ensure CSV files are in the correct format
+   - Check file permissions
+   - Verify URL accessibility for external files
+
+3. **Training Takes Too Long**
+   - Check dataset size (large datasets take more time)
+   - Monitor server logs for errors
+   - Ensure sufficient system resources
+
+4. **Predictions Not Working**
+   - Verify model was trained successfully
+   - Check feature names and types
+   - Ensure all required features are provided
+
+## 📈 Advanced Features
+
+### Custom Styling
+The interface includes:
+- Gradient backgrounds
+- Hover effects on buttons
+- Custom metric cards
+- Responsive design elements
+
+### Data Visualization
+- Interactive Plotly charts
+- Real-time accuracy comparisons
+- Confidence score visualizations
+- Training history trends
+
+### State Persistence
+- Automatic session recovery
+- Cross-tab data sharing
+- History preservation
+- Smart refresh mechanisms
+
+## 🤝 Contributing
+
+To extend the client:
+1. Add new methods to the `APIClient` class for new endpoints
+2. Create new sections in the `Dashboard` class
+3. Update the session state management in `SessionState`
+4. Add new visualizations using Plotly
+
+---
+
+**Built with ❤️ for the NaiveHub ML Platform**
 
 ## 🏗️ Architecture
 
