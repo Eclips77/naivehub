@@ -221,7 +221,7 @@ class APIClient:
         try:
             payload = {
                 "model_name": model_name,
-                "features": features
+                "record": features
             }
             response = requests.post(f"{PREDICTOR_URL}/predict", json=payload, timeout=30)
             return response.json()
@@ -616,11 +616,10 @@ class Dashboard:
                                         
                                         # Confidence visualization
                                         fig = px.bar(
-                                            conf_df, 
-                                            x='Class', 
-                                            y=[float(c.rstrip('%'))/100 for c in conf_df['Confidence']],
+                                            x=list(confidence.keys()), 
+                                            y=list(confidence.values()),
                                             title="Prediction Confidence",
-                                            labels={'y': 'Confidence'}
+                                            labels={'x': 'Class', 'y': 'Confidence'}
                                         )
                                         st.plotly_chart(fig, use_container_width=True)
                                     

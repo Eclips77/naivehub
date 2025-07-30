@@ -105,7 +105,7 @@ async def train_model(req: TrainRequest):
         
         return {
             "message": f"Model '{req.model_name}' trained and saved successfully",
-            "accuracy": f"{accuracy * 100:.2f}%",
+            "accuracy": accuracy,
             "features": list(model.get("likelihoods", {}).keys()),
             "classes": model["classes"]
         }

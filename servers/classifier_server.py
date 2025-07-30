@@ -115,25 +115,34 @@ async def load_model_from_storage(req: LoadModelRequest):
 async def predict(req: PredictRequest):
     """Make a prediction using a cached model."""
     try:
+        # Auto-load model if not in cache
         if req.model_name not in loaded_models:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Model '{req.model_name}' not loaded. Use /load_model endpoint first."
-            )
+            # Try to load model from storage
+            try:
+                load_request = LoadModelRequest(model_name=req.model_name)
+                await load_model_from_storage(load_request)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Model '{req.model_name}' not found or cannot be loaded: {str(e)}"
+                )
 
         # Update last used time
         if req.model_name in model_cache_info:
             model_cache_info[req.model_name]["last_used"] = datetime.now().isoformat()
 
         predictor = loaded_models[req.model_name]
-        result = predictor.predict(req.record)
+        prediction, probabilities = predictor.predict_with_confidence(req.record)
         
         return {
-            "prediction": result,
+            "prediction": prediction,
+            "confidence": probabilities,
             "model_name": req.model_name,
             "timestamp": datetime.now().isoformat()
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 

@@ -61,6 +61,52 @@ class NaiveBayesPredictor:
 
         return max(log_probs, key=log_probs.get)
 
+    def get_probabilities(self, sample: Dict[str, Any]) -> Dict[str, float]:
+        """Calculate prediction probabilities for all classes.
+        
+        Returns the probability distribution over all classes for the given sample.
+        
+        Args:
+            sample (Dict[str, Any]): A dictionary containing feature names as keys
+                and their corresponding values.
+                
+        Returns:
+            Dict[str, float]: Dictionary mapping class labels to their probabilities.
+        """
+        log_probs = {cls: math.log(self.priors[cls]) for cls in self.classes}
+
+        for feature, value in sample.items():
+            if feature in self.likelihoods and value in self.likelihoods[feature]:
+                for cls in self.classes:
+                    prob = self.likelihoods[feature][value].get(cls, 1e-6)
+                    log_probs[cls] += math.log(prob)
+
+        # Convert log probabilities to probabilities
+        max_log_prob = max(log_probs.values())
+        # Subtract max to avoid overflow when exponentiating
+        normalized_log_probs = {cls: log_prob - max_log_prob for cls, log_prob in log_probs.items()}
+        probs = {cls: math.exp(log_prob) for cls, log_prob in normalized_log_probs.items()}
+        
+        # Normalize to get proper probabilities
+        total_prob = sum(probs.values())
+        return {cls: prob / total_prob for cls, prob in probs.items()}
+
+    def predict_with_confidence(self, sample: Dict[str, Any]) -> tuple:
+        """Predict class label with confidence scores.
+        
+        Returns both the predicted class and the probability distribution.
+        
+        Args:
+            sample (Dict[str, Any]): A dictionary containing feature names as keys
+                and their corresponding values.
+                
+        Returns:
+            tuple: (predicted_class, probability_dict)
+        """
+        probabilities = self.get_probabilities(sample)
+        predicted_class = max(probabilities, key=probabilities.get)
+        return predicted_class, probabilities
+
     def predict_batch(self, df: pd.DataFrame) -> list:
         """Predict class labels for multiple samples in a DataFrame.
         
