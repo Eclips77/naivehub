@@ -427,14 +427,5 @@ docker-compose logs
 4. Add tests and documentation
 5. Submit a pull request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 📞 Support
-
-For questions or issues, please open an issue on the repository or contact the development team.
-
----
 
 **NaiveHub** - Simple, powerful, and scalable Naive Bayes classification! 🎯
