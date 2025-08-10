@@ -50,7 +50,7 @@ A comprehensive Naive Bayes classification system built with Python, featuring b
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone <(https://github.com/Eclips77/naivehub.git)>
    cd NaiveHub
    ```
 
@@ -73,7 +73,7 @@ A comprehensive Naive Bayes classification system built with Python, featuring b
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone <(https://github.com/Eclips77/naivehub.git)>
    cd NaiveHub
    ```
 
